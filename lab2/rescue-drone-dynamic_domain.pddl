@@ -1,5 +1,5 @@
 (define (domain rescue-drone-dynamic)
-  (:requirements :typing :strips :negative-preconditions :fluents)
+  (:requirements :typing :strips :negative-preconditions)
 
   (:types
     location - object
@@ -20,10 +20,6 @@
     (Safe-zone-has-capacity ?loc - location ?c - capacity)
   )
 
-  (:functions
-    (moves)
-  )
-
   (:action Move
     :parameters (?dr - drone ?loc1 ?loc2 - location)
     :precondition (and 
@@ -33,8 +29,7 @@
     :effect (and
              (not (Drone-location ?dr ?loc1))
              (Drone-location ?dr ?loc2)
-             (increase (moves) 1))
-  )
+  ))
 
   (:action Pick-up
     :parameters (?dr - drone ?p - person ?loc - location)
@@ -47,7 +42,7 @@
              (not (Person-location ?p ?loc))
              (Drone-carry ?p)
              (not (Drone-free))
-             (increase (moves) 1))
+             )
   )
 
   (:action Drop-off
@@ -64,18 +59,12 @@
              (Person-location ?p ?safe_loc)
              (not (Drone-carry ?p))
              (Rescued ?p)
-             (Drone-free)
-             (increase (moves) 1))
+             (Drone-free))
   )
 
   (:action Increase-Capacity
     :parameters (?safe_loc - location ?c - capacity)
-    :precondition (and 
-                   (Safe-zone ?safe_loc)
-                   (not (Safe-zone-has-capacity ?safe_loc ?c))
-                   (>= (moves) 7))
-    :effect (and
-             (Safe-zone-has-capacity ?safe_loc ?c)
-             (assign (moves) 0))
+    :precondition (not (Safe-zone-has-capacity ?safe_loc ?c))
+    :effect (Safe-zone-has-capacity ?safe_loc ?c)
   )
 )

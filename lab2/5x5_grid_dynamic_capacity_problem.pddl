@@ -72,8 +72,6 @@
     ; Set initial drone state
     (drone-free)
 
-    ; Initialize move counter
-    (= (moves) 0)
   )
 
   (:goal (and
@@ -82,7 +80,4 @@
     (rescued person3)
     (rescued person4)
   ))
-
-  ; Add a metric to minimize the number of moves
-  (:metric minimize (moves))
 )
