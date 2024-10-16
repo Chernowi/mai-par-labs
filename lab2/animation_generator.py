@@ -1,5 +1,68 @@
 import re
+import os
+from PIL import Image, ImageDraw, ImageFont
 from collections import defaultdict
+
+def parse_pddl_file(file_path):
+    with open(file_path, 'r') as f:
+        content = f.read()
+
+    grid_size = 5  # Default size
+    if 'loc-4-4' in content and 'loc-5-5' not in content:
+        grid_size = 4
+
+    drone_location = re.search(r'\(drone-location drone1 (loc-\d-\d)\)', content)
+    drone_location = drone_location.group(1) if drone_location else None
+
+    person_locations = re.findall(r'\(person-location person\d+ (loc-\d-\d)\)', content)
+    
+    safe_zone = re.search(r'\(safe-zone (loc-\d-\d)\)', content)
+    safe_zone = safe_zone.group(1) if safe_zone else None
+
+    obstacles = re.findall(r'\(obstacle (loc-\d-\d)\)', content)
+
+    return grid_size, drone_location, person_locations, safe_zone, obstacles
+
+def draw_grid(grid_size, drone_location, person_locations, safe_zone, obstacles, safe_zone_capacity):
+    cell_size = 100
+    img_size = cell_size * grid_size
+    img = Image.new('RGB', (img_size, img_size), color='white')
+    draw = ImageDraw.Draw(img)
+
+    # Try to load a font, fall back to default if not available
+    try:
+        font = ImageFont.truetype("arial.ttf", 20)
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Draw grid lines
+    for i in range(1, grid_size):
+        draw.line([(0, i * cell_size), (img_size, i * cell_size)], fill='black')
+        draw.line([(i * cell_size, 0), (i * cell_size, img_size)], fill='black')
+
+    # Draw obstacles
+    for obstacle in obstacles:
+        x, y = map(int, obstacle[4:].split('-'))
+        draw.rectangle([(x-1)*cell_size, (y-1)*cell_size, x*cell_size, y*cell_size], fill='gray')
+
+    # Draw safe zone
+    if safe_zone:
+        x, y = map(int, safe_zone[4:].split('-'))
+        draw.rectangle([(x-1)*cell_size, (y-1)*cell_size, x*cell_size, y*cell_size], fill='green')
+        # Add capacity number
+        draw.text(((x-1)*cell_size+10, (y-1)*cell_size+10), str(safe_zone_capacity), fill='black', font=font)
+
+    # Draw drone
+    if drone_location:
+        x, y = map(int, drone_location[4:].split('-'))
+        draw.ellipse([(x-1)*cell_size+10, (y-1)*cell_size+10, x*cell_size-10, y*cell_size-10], fill='blue')
+
+    # Draw persons
+    for person in person_locations:
+        x, y = map(int, person[4:].split('-'))
+        draw.rectangle([(x-1)*cell_size+30, (y-1)*cell_size+30, x*cell_size-30, y*cell_size-30], fill='red')
+
+    return img
 
 def parse_plan(plan_text):
     actions = []
@@ -10,72 +73,42 @@ def parse_plan(plan_text):
             actions.append(action)
     return actions
 
-def generate_animation_pddl(domain_file, plan_text):
-    with open(domain_file, 'r') as f:
-        domain_content = f.read()
+def update_state(action, drone_location, person_locations, safe_zone_capacity):
+    action_type = action[0]
+    if action_type == 'move':
+        drone_location = action[3]
+    elif action_type == 'pick-up':
+        person = action[2]
+        person_locations = [loc for loc in person_locations if loc != action[3]]
+    elif action_type == 'drop-off':
+        person_locations.append(action[3])
+        safe_zone_capacity += 1
+    elif action_type == 'increase-capacity':
+        safe_zone_capacity -= 1
+    return drone_location, person_locations, safe_zone_capacity
 
+def create_animation(pddl_file_path, plan_text):
+    grid_size, drone_location, person_locations, safe_zone, obstacles = parse_pddl_file(pddl_file_path)
     actions = parse_plan(plan_text)
     
-    objects = defaultdict(set)
-    init_state = set()
-    
-    # Extract objects and initial state from actions
+    safe_zone_capacity = 0
+    images = []
     for action in actions:
-        action_name = action[0]
-        if action_name == 'move':
-            objects['drone'].add(action[1])
-            objects['location'].add(action[2])
-            objects['location'].add(action[3])
-            if not init_state:  # Assume first move action gives initial drone location
-                init_state.add(f'(Drone-location {action[1]} {action[2]})')
-        elif action_name == 'pick-up':
-            objects['drone'].add(action[1])
-            objects['person'].add(action[2])
-            objects['location'].add(action[3])
-            init_state.add(f'(Person-location {action[2]} {action[3]})')
-        elif action_name == 'drop-off':
-            objects['drone'].add(action[1])
-            objects['person'].add(action[2])
-            objects['location'].add(action[3])
-            objects['capacity'].add(action[4])
-            init_state.add(f'(Safe-zone {action[3]})')
-            init_state.add(f'(Safe-zone-has-capacity {action[3]} {action[4]})')
-
-    # Add Drone-free to initial state
-    init_state.add('(Drone-free)')
-
-    # Generate animation PDDL content
-    animation_content = "(define (problem rescue-drone-animation)\n"
-    animation_content += f"  (:domain {domain_content.split('(define (domain ')[1].split(')')[0]})\n"
+        img = draw_grid(grid_size, drone_location, person_locations, safe_zone, obstacles, safe_zone_capacity)
+        images.append(img)
+        drone_location, person_locations, safe_zone_capacity = update_state(action, drone_location, person_locations, safe_zone_capacity)
     
-    # Objects
-    animation_content += "  (:objects\n"
-    for obj_type, obj_set in objects.items():
-        animation_content += f"    {' '.join(obj_set)} - {obj_type}\n"
-    animation_content += "  )\n"
+    # Add final state
+    images.append(draw_grid(grid_size, drone_location, person_locations, safe_zone, obstacles, safe_zone_capacity))
     
-    # Initial state
-    animation_content += "  (:init\n"
-    for pred in init_state:
-        animation_content += f"    {pred}\n"
-    animation_content += "  )\n"
-    
-    # Goal (empty for animation)
-    animation_content += "  (:goal (and))\n"
-    
-    # Actions (without timestamps)
-    animation_content += "  (:plan\n"
-    for action in actions:
-        action_str = ' '.join(action)
-        animation_content += f"    ({action_str})\n"
-    animation_content += "  )\n"
-    
-    animation_content += ")"
-    
-    return animation_content
+    # Save as GIF
+    base_name = os.path.splitext(os.path.basename(pddl_file_path))[0]
+    output_gif_path = f"{base_name}_animation.gif"
+    images[0].save(output_gif_path, save_all=True, append_images=images[1:], duration=1000, loop=0)
+    print(f"Animation saved to {output_gif_path}")
 
 def main():
-    domain_file = "rescue-drone-static_domain.pddl"
+    pddl_file = "lab2/5x5_grid_solvable_problem.pddl"  # Update this to your PDDL problem file name
     plan_text = """
 0.00000: (move drone1 loc-1-1 loc-1-2)
 0.00100: (move drone1 loc-1-2 loc-1-3)
@@ -101,12 +134,7 @@ def main():
 0.02100: (drop-off drone1 person3 loc-3-3 capacity3)
     """
     
-    animation_content = generate_animation_pddl(domain_file, plan_text)
-    
-    with open("animation.pddl", "w") as f:
-        f.write(animation_content)
-    
-    print("Animation PDDL file has been generated: animation.pddl")
+    create_animation(pddl_file, plan_text)
 
 if __name__ == "__main__":
     main()
