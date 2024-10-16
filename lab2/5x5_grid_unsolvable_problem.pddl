@@ -60,10 +60,17 @@
     (person-location person1 loc-2-3)
     (person-location person2 loc-4-2)
     (person-location person3 loc-5-5)
-    (person-location person4 loc-3-4)
+    (person-location person4 loc-4-4)
     
     ; Set safe zone
     (safe-zone loc-3-3)
+
+    ; Add obstacles
+    (obstacle loc-2-2)
+    (obstacle loc-3-4)
+    (obstacle loc-4-1)
+    (obstacle loc-1-5)
+    (obstacle loc-5-3)
     
     ; Set safe zone capacity (insufficient)
     (safe-zone-has-capacity loc-3-3 capacity1)

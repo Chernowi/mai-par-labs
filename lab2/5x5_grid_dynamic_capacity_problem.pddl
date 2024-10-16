@@ -68,6 +68,13 @@
     ; Set initial safe zone capacity
     (safe-zone-has-capacity loc-3-3 capacity1)
     (safe-zone-has-capacity loc-3-3 capacity2)
+
+    ; Add obstacles
+    (obstacle loc-2-2)
+    (obstacle loc-3-5)
+    (obstacle loc-4-1)
+    (obstacle loc-1-5)
+    (obstacle loc-5-3)
     
     ; Set initial drone state
     (drone-free)
