@@ -73,7 +73,7 @@
     :precondition (and 
                    (Safe-zone ?safe_loc)
                    (not (Safe-zone-has-capacity ?safe_loc ?c))
-                   (>= (moves) 5))
+                   (>= (moves) 7))
     :effect (and
              (Safe-zone-has-capacity ?safe_loc ?c)
              (assign (moves) 0))
