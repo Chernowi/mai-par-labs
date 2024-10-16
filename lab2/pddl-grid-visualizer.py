@@ -73,7 +73,7 @@ def find_pddl_problem_files(directory):
 
 def main():
     current_directory = os.getcwd()
-    for pddl_file in find_pddl_problem_files(current_directory):
+    for pddl_file in find_pddl_problem_files("lab2"):
         process_pddl_file(pddl_file)
 
 if __name__ == "__main__":
