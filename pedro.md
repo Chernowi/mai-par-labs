@@ -1,10 +1,10 @@
-# Rescue drone task #
-## Abstract ##
+# Rescue drone task 
+## Abstract 
 The report focuses on the design and implementation of a rescue drone planning system for navigating disaster sites using a grid-based environment. It includes the testing of the planner on various grid configurations and an analysis of the efficiency of the solutions generated, considering factors like search space, operator applicability, and performance across different test cases. The goal is to evaluate whether the planner can consistently generate effective and optimal rescue plans.
 
-# Drone Rescue Mission: Problem and Domain Description
+## Analysis of the problem
 
-## Static Domain File Overview: `rescue-drone-static_domain.pddl`
+### Static Domain File Overview: `rescue-drone-static_domain.pddl`
 
 This file defines the **static rules** and capabilities of the environment, including:
 
@@ -26,13 +26,13 @@ This file defines the **static rules** and capabilities of the environment, incl
 
 ---
 
-## Dynamic Domain File Overview: `rescue-drone-dynamic_domain.pddl`
+### Dynamic Domain File Overview: `rescue-drone-dynamic_domain.pddl`
 
 This file extends the static domain with the action `Increase-Capacity`, allowing the drone to reset the predicate `Safe-zone-has-capacity`
 
 ---
 
-## Problem File Overview: `5x5_grid_dynamic_capacity_problem.pddl`
+### Problem File Overview: `5x5_grid_dynamic_capacity_problem.pddl`
 
 The problem file defines the specific instance of the rescue mission. Here are its key elements:
 
@@ -52,10 +52,36 @@ The problem file defines the specific instance of the rescue mission. Here are i
   The goal is to move the drone to rescue all the people by picking them up from their initial locations and dropping them off at designated safe zones.
 
 ---
+## Testing cases and results
 
-## Visualizing the Initial State
+To better understand the environment, an image is displayed with the starting positions of the drone and the people for each of the studied cases. In all of the scenarios the drone is represented as a blue circle, the people as red squares, the obstacles as gray squares and the safe zone in green.
 
-To better understand the environment, an image can be created showing the 5x5 grid with the starting positions of the drone and the people. The grid layout would highlight the initial positions of each entity.
+### Case 1: 4x4 grid, solvable problem and static domain
 
 ![Initial State of Drone Rescue Mission](lab2/4x4_grid_solvable_problem_state.png)
+
+### Case 2: 5x5 grid, solvable problem and static domain
+
+![Initial State of Drone Rescue Mission](lab2/5x5_grid_solvable_problem_state.png)
+
+### Case 3: 5x5 grid, unsolvable problem and static domain
+
+![Initial State of Drone Rescue Mission](lab2/5x5_grid_unsolvable_problem_state.png)
+
+### Case 3: 5x5 grid, solvable problem and dynamic capacity domain
+
+![Initial State of Drone Rescue Mission](lab2/5x5_grid_dynamic_capacity_problem_state.png)
+
+## Analysis of the results
+
+| Case     | Total time (s)     | Generated nodes     | Expanded nodes |
+|:----------:|:-----------:|:---------------:|:----------:|
+| 1        | 0.0892079 | 84 | 29 |
+| 2        | 0.0045755 | 71 | 23 |
+| 3        | - | - | -|
+| 4        | 0.246425 | 101 | 29| 
+
+
+*Table 1: Total time, generated nodes and expanded nodes for each of the analyzed cases.* 
+
 
