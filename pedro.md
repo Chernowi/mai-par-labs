@@ -32,7 +32,36 @@ This file extends the static domain with the action `Increase-Capacity`, allowin
 
 ---
 
-### Problem File Overview: `5x5_grid_dynamic_capacity_problem.pddl`
+### Problem File Overview: Case 1. `4x4_grid_solvable_problem.pddl`
+
+The problem file defines a specific instance of a rescue mission. Below are its key elements:
+
+- **Objects:**
+  - **Locations:** 
+    - 16 locations are defined in the 4x4 grid: `loc-1-1`, `loc-1-2`, `loc-1-3`, `loc-1-4`, `loc-2-1`, `loc-2-2`, `loc-2-3`, `loc-2-4`, `loc-3-1`, `loc-3-2`, `loc-3-3`, `loc-3-4`, `loc-4-1`, `loc-4-2`, `loc-4-3`, `loc-4-4`.
+  - **Drone:**
+    - One drone is defined: `drone1`.
+  - **Three persons to be rescued:**
+    - `person1`, `person2`, `person3`.
+  - **Capacities for safe zones:**
+    - Three capacity objects: `c1`, `c2`, `c3`. These likely represent the capacity limits of safe zones where rescued persons will be dropped off.
+
+- **Initial Conditions:**
+  - **Grid definition through adjacency:**
+    - The grid is defined using adjacency relations between the locations in a 4x4 configuration. For example, `(adjacent loc-1-1 loc-1-2)` means that `loc-1-1` is adjacent to `loc-1-2`, and similar relations exist to define both horizontal and vertical adjacencies.
+  - **Drone Location:**
+    - The drone starts at a specific location within the grid, though the exact initial position is not fully visible from the provided content.
+  - **Person Locations:**
+    - Each person (`person1`, `person2`, `person3`) is placed in different, distinct locations within the grid.
+  - **Safe Zones:**
+    - The capacities defined as `c1`, `c2`, `c3` indicate safe zones where the persons need to be delivered once rescued by the drone. Each safe zone has a capacity constraint that must be considered during the mission.
+
+- **Goal:**
+  - The goal is to use the drone to pick up the three people from their respective locations and safely deliver them to the designated safe zones with available capacities. The mission requires strategic movement within the grid while respecting adjacency constraints.
+
+
+---
+### Problem File Overview: Case 4. `5x5_grid_dynamic_capacity_problem.pddl`
 
 The problem file defines the specific instance of the rescue mission. Here are its key elements:
 
