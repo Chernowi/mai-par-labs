@@ -29,6 +29,7 @@ This file defines the **static rules** and capabilities of the environment, incl
 ### Dynamic Domain File Overview: `rescue-drone-dynamic_domain.pddl`
 
 This file extends the static domain with the action `Increase-Capacity`, allowing the drone to reset the predicate `Safe-zone-has-capacity`
+This assumes that randomly in any moment a person can leave the safe zone and leave a free spot in it
 
 ---
 
