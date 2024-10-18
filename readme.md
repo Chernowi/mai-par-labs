@@ -10,6 +10,37 @@ MAI students
 ## Abstract 
 The report focuses on the design and implementation of a rescue drone planning system for navigating disaster sites using a grid-based environment. It includes the testing of the planner on various grid configurations and an analysis of the efficiency of the solutions generated, considering factors like search space, operator applicability, and performance across different test cases. The goal is to evaluate whether the planner can consistently generate effective and optimal rescue plans.
 
+
+## Table of Contents
+
+
+1. [Analysis of the Problem](#analysis-of-the-problem)
+   - Inspiration from Previous Labs
+   - Theoretical Approach
+   - Implementation in PDDL
+     - Static Domain File Overview
+     - Dynamic Domain File Overview
+2. [Problem File Overviews](#problem-file-overviews)
+   - Case 1: `4x4_grid_solvable_problem.pddl`
+   - Case 2: `5x5_grid_solvable_problem.pddl`
+   - Case 3: `5x5_grid_unsolvable_problem.pddl`
+   - Case 4: `5x5_grid_dynamic_capacity_problem.pddl`
+3. [Testing Cases and Results](#testing-cases-and-results)
+   - Case 1: 4x4 Grid, Solvable Problem and Static Domain
+   - Case 2: 5x5 Grid, Solvable Problem and Static Domain
+   - Case 3: 5x5 Grid, Unsolvable Problem and Static Domain
+   - Case 4: 5x5 Grid, Solvable Problem and Dynamic Capacity Domain
+4. [Analysis of the Results](#analysis-of-the-results)
+   - Delfi Planner
+   - BWFS Planner
+   - Summary
+5. [Illustration of the Results](#illustration-of-the-results)
+   - Case 1: 4x4 Grid, Solvable Problem and Static Domain
+   - Case 2: 5x5 Grid, Solvable Problem and Static Domain
+   - Case 3: 5x5 Grid, Solvable Problem and Dynamic Capacity Domain
+6. [References](#references)
+7. [Execution Output](#execution-output)
+
 ## Analysis of the problem
 
 For solving the problem we will use as inspiration the two labs that we have done in with the professor: 
@@ -137,13 +168,15 @@ To better understand the environment, an image is displayed with the starting po
 
 ## Analysis of the results
 
+### Delfi Planner
+
 The search strategy used in this planning task is A* (A-star) with the **merge-and-shrink heuristic**. The heuristic incorporates an exact **bisimulation shrink strategy**, which reduces the size of the state space while preserving relevant transitions. For merging, a **precomputed merge tree** is used, guided by the **miasm_merge_and_shrink** approach. This includes heuristic scoring functions like **goal relevance**, **DFP** (Diverse Frontier Projection), and **total order**, ensuring an efficient search. To further optimize, **structural symmetries** are handled through OSS, reducing redundancy, and **stubborn sets simple** pruning is applied to eliminate unnecessary expansions, improving search performance.
 
 Moreover, in the provided plan for each scenario, several key performance parameters were analyzed, including generated nodes, expanded nodes, and total time used, as seen in Table 1. The generated nodes represent the total number of states created during the search process, while the expanded nodes refer to the subset of those states that were fully explored, with all their possible actions evaluated. These metrics, along with the total time taken by the planner, provide insight into the efficiency and complexity of the search process in each case.
 
 From these results, it can be concluded that the efficiency of the planner (in terms of time) does not solely depend on the number of generated or expanded nodes. External factors, such as the complexity of the problem and the specific structure of the state space, likely contribute to the observed differences.
 
-### Delfi Planner
+To conclude, we have to add that A* **doesn't have to find always find a optimal solution**
 
 Delfi, across all the problems, shows a relatively balanced performance in terms of generated and expanded nodes. It often generates fewer nodes compared to BWFS, which could indicate better pruning techniques. This is especially notable in the `5x5_solvable` and `4x4_solvable` problems, where it expands fewer nodes while maintaining competitive time performance.
 
@@ -188,7 +221,7 @@ Both planners exhibit different strengths and weaknesses. Delfi generally perfor
 ### Illustration of the results
 
 In this section we will include the animation of the **solvable** problems found path using Delfi planner. This helps us visualize and understand the solution found better that the waterfall view that vsCode provides. With this purpose a python script has been provided to automate this process: `animation_generator.py`.
-
+**Note**: PDF doesn't support gif files, please refer to our [github repository](https://github.com/Chernowi/mai-par-labs).
 #### Case 1: 4x4 grid, solvable problem and static domain
 
 ![Initial State of Drone Rescue Mission Animation](animations/4x4_grid_solvable_problem_animation.gif)
