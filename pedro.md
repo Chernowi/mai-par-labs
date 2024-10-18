@@ -33,9 +33,6 @@ This file extends the static domain with the action `Increase-Capacity`, allowin
 ---
 
 ### Problem File Overview: Case 1. `4x4_grid_solvable_problem.pddl`
-
-The problem file defines a specific instance of a rescue mission. Below are its key elements:
-
 - **Objects:**
   - **Locations:** 
     - 16 locations are defined in the 4x4 grid: `loc-1-1`, `loc-1-2`, `loc-1-3`, `loc-1-4`, `loc-2-1`, `loc-2-2`, `loc-2-3`, `loc-2-4`, `loc-3-1`, `loc-3-2`, `loc-3-3`, `loc-3-4`, `loc-4-1`, `loc-4-2`, `loc-4-3`, `loc-4-4`.
@@ -57,19 +54,15 @@ The problem file defines a specific instance of a rescue mission. Below are its 
     - The capacities defined as `c1`, `c2`, `c3` indicate safe zones where the persons need to be delivered once rescued by the drone. Each safe zone has a capacity constraint that must be considered during the mission.
 
 - **Goal:**
-  - The goal is to use the drone to pick up the three people from their respective locations and safely deliver them to the designated safe zones with available capacities. The mission requires strategic movement within the grid while respecting adjacency constraints.
-
-
+  - The goal for all the problems is to have all persons with the rescue state set to true (all of them dropped-off on the safe zone)
 ---
-### Problem File Overview: Case 4. `5x5_grid_dynamic_capacity_problem.pddl`
 
-The problem file defines the specific instance of the rescue mission. Here are its key elements:
-
+### Problem File Overview: Case 2. `5x5_grid_solvable_problem.pddl`
 - **Objects:**
   - Locations: 25 locations are defined (`loc-1-1`, `loc-1-2`, etc.) representing the cells of the grid.
   - One drone: `drone1`.
   - Four persons to be rescued: `person1`, `person2`, `person3`, `person4`.
-  - Capacity for safe zones: `capacity1`, `capacity2`.
+  - Four capacities: `capacity1`, `capacity2`, `capacity3`, `capacity4`.
 
 - **Initial Conditions:**
   - The grid is defined by setting adjacent locations. For example, `(adjacent loc-1-1 loc-1-2)` defines that these two locations are connected.
@@ -77,10 +70,29 @@ The problem file defines the specific instance of the rescue mission. Here are i
   - Each person is placed in a different location.
   - Safe zones have capacity, which is essential for rescuing people.
 
-- **Goal:**
-  The goal is to move the drone to rescue all the people by picking them up from their initial locations and dropping them off at designated safe zones.
+---
+
+### Problem File Overview: Case 3. `5x5_grid_unsolvable_problem.pddl`
+- **Objects:**
+  - Locations: 25 locations are defined (`loc-1-1`, `loc-1-2`, etc.) representing the cells of the grid.
+  - One drone: `drone1`.
+  - Four persons to be rescued: `person1`, `person2`, `person3`, `person4`.
+  - 2 safe zone capacities (note that is less than the number of people): `capacity1`, `capacity2`.
+
+- **Initial Conditions:**
+  - The grid is defined by setting adjacent locations. For example, `(adjacent loc-1-1 loc-1-2)` defines that these two locations are connected.
+  - The drone starts in one specific location.
+  - Each person is placed in a different location.
+  - Safe zones have capacity, which is essential for rescuing people.
 
 ---
+
+### Problem File Overview: Case 4. `5x5_grid_dynamic_capacity_problem.pddl`
+
+This problem is identic to the `5x5_grid_unsolvable_problem.ppdl` with the difference of the domain, this one uses the `lab2/rescue-drone-dynamic_domain.pddl` which includes the action `Increase-Capacity`.
+
+---
+
 ## Testing cases and results
 
 To better understand the environment, an image is displayed with the starting positions of the drone and the people for each of the studied cases. In all of the scenarios the drone is represented as a blue circle, the people as red squares, the obstacles as gray squares and the safe zone in green.
@@ -111,15 +123,17 @@ Moreover, in the provided plan for each scenario, several key performance parame
 
 From these results, it can be concluded that the efficiency of the planner (in terms of time) does not solely depend on the number of generated or expanded nodes. External factors, such as the complexity of the problem and the specific structure of the state space, likely contribute to the observed differences.
 
-
-| Case     | Total time (s)     | Generated nodes     | Expanded nodes |
-|:----------:|:-----------:|:---------------:|:----------:|
-| 1        | 0.0892079 | 84 | 29 |
-| 2        | 0.0045755 | 71 | 23 |
-| 3        | - | - | -|
-| 4        | 0.246425 | 101 | 29| 
-
-
-*Table 1: Total time, generated nodes and expanded nodes for each of the analyzed cases.* 
-
-
+| Problem & Planner               | 4x4_solvable (Delfi) | 4x4_solvable (BWFS) | 5x5_solvable (Delfi) | 5x5_solvable (BWFS) | 5x5_unsolvable (Delfi) | 5x5_dyn_capacity (Delfi) | 5x5_dyn_capacity (BWFS) |
+|----------------------------------|----------------------|---------------------|----------------------|---------------------|------------------------|--------------------------|-------------------------|
+| **Plan length**                  | 28 steps             | 32 steps            | 22 steps             | 22 steps            | N/A                    | 28 steps                 | 28 steps                |
+| **Plan cost**                    | 28                   | 32                  | 22                   | 22                  | N/A                    | 28                       | 28                      |
+| **Expanded states**              | 29                   | 95                  | 23                   | 128                 | N/A                    | 29                       | 1370                    |
+| **Reopened states**              | 0                    | N/A                 | 0                    | N/A                 | N/A                    | 0                        | N/A                     |
+| **Evaluated states**             | 60                   | N/A                 | 62                   | N/A                 | N/A                    | 73                       | N/A                     |
+| **Generated states**             | 84                   | 149                 | 85                   | 233                 | N/A                    | 101                      | 1656                    |
+| **Search time**                  | 0.00077 s            | 0.00045 s           | 0.00086 s            | 0.00047 s           | N/A                    | 0.00105 s                | 0.01657 s               |
+| **Total time**                   | 0.0865 s             | 0.00045 s           | 0.00578 s            | 0.00278 s           | N/A                    | 0.2131 s                 | 0.01657 s               |
+| **Peak memory**                  | 22,476 KB            | N/A                 | 5,656 KB             | N/A                 | N/A                    | 58,348 KB                | N/A                     |
+| **Makespan**                     | 0.0270 s             | 0.0310 s            | 0.0210 s             | 0.0210 s            | N/A                    | 0.0270 s                 | 0.0270 s                |
+| **Search duration**              | 8.28 s               | 3.43 s              | 8.61 s               | 2.78 s              | 7.10 s                 | 9.00 s                   | 2.77 s                  |
+| **Plans found**                  | 1                    | 1                   | 1                    | 1                   | 0                      | 1                        | 1                       |

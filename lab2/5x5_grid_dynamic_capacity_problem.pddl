@@ -1,4 +1,4 @@
-(define (problem rrescue-mission-dynamic-capacity)
+(define (problem rescue-mission-dynamic-capacity)
   (:domain rescue-drone-dynamic)
   
   (:objects
