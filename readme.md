@@ -73,17 +73,14 @@ This file extends the static domain with the action `Increase-Capacity`, allowin
 ---
 
 ### Problem File Overview: Case 3. `5x5_grid_unsolvable_problem.pddl`
+
+Same as the `5x5_grid_solvable_problem.pddl` with the execption that there are less capacity objects than people. Since this problem uses the static domain it will not be solvable.
+
 - **Objects:**
   - Locations: 25 locations are defined (`loc-1-1`, `loc-1-2`, etc.) representing the cells of the grid.
   - One drone: `drone1`.
   - Four persons to be rescued: `person1`, `person2`, `person3`, `person4`.
-  - 2 safe zone capacities (note that is less than the number of people): `capacity1`, `capacity2`.
-
-- **Initial Conditions:**
-  - The grid is defined by setting adjacent locations. For example, `(adjacent loc-1-1 loc-1-2)` defines that these two locations are connected.
-  - The drone starts in one specific location.
-  - Each person is placed in a different location.
-  - Safe zones have capacity, which is essential for rescuing people.
+  - Two capacities: `capacity1`, `capacity2`.
 
 ---
 
@@ -98,23 +95,23 @@ This problem is identic to the `5x5_grid_unsolvable_problem.ppdl` with the diffe
 To better understand the environment, an image is displayed with the starting positions of the drone and the people for each of the studied cases. In all of the scenarios the drone is represented as a blue circle, the people as red squares, the obstacles as gray squares and the safe zone in green.
 
 ### Case 1: 4x4 grid, solvable problem and static domain
-
-![Initial State of Drone Rescue Mission](lab2/4x4_grid_solvable_problem_state.png)
-![Animation](animations\4x4_grid_solvable_problem_animation.gif)
+![Animation](animations/4x4_grid_solvable_problem_animation.gif)
+---
 
 ### Case 2: 5x5 grid, solvable problem and static domain
-
-![Initial State of Drone Rescue Mission](lab2/5x5_grid_solvable_problem_state.png)
-![Animation](animations\5x5_grid_solvable_problem_animation.gif)
+![Animation](animations/5x5_grid_solvable_problem_animation.gif)
+---
 
 ### Case 3: 5x5 grid, unsolvable problem and static domain
+![Initial State of Drone Rescue Mission](animations/5x5_grid_unsolvable_problem_state.png)
 
-![Initial State of Drone Rescue Mission](lab2/5x5_grid_unsolvable_problem_state.png)
+*No animation since it's unsolvable*
+
+---
 
 ### Case 3: 5x5 grid, solvable problem and dynamic capacity domain
-
-![Initial State of Drone Rescue Mission](lab2/5x5_grid_dynamic_capacity_problem_state.png)
-![Animation](animations\5x5_grid_dynamic_capacity_problem_animation.gif)
+![Animation](animations/5x5_grid_dynamic_capacity_problem_animation.gif)
+---
 
 ## Analysis of the results
 
@@ -141,4 +138,4 @@ From these results, it can be concluded that the efficiency of the planner (in t
 | **Search duration**              | 8.28 s               | 3.43 s              | 8.61 s               | 2.78 s              | 7.10 s                 | 9.00 s                   | 2.77 s                  |
 | **Plans found**                  | 1                    | 1                   | 1                    | 1                   | 0                      | 1                        | 1                       |
 
-*Table 1: Run stats for the each of the four problems, for delfi and BWFS.* 
+*Table 1: Run stats for the each of the four problems, for delfi and BWFS planners.* 

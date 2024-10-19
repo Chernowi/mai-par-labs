@@ -258,23 +258,14 @@
 </ul>
 <hr>
 <h3 id="problem-file-overview-case-3-5x5_grid_unsolvable_problempddl">Problem File Overview: Case 3. <code>5x5_grid_unsolvable_problem.pddl</code></h3>
+<p>Same as the <code>5x5_grid_solvable_problem.pddl</code> with the execption that there are less capacity objects than people. Since this problem uses the static domain it will not be solvable.</p>
 <ul>
-<li>
-<p><strong>Objects:</strong></p>
+<li><strong>Objects:</strong>
 <ul>
 <li>Locations: 25 locations are defined (<code>loc-1-1</code>, <code>loc-1-2</code>, etc.) representing the cells of the grid.</li>
 <li>One drone: <code>drone1</code>.</li>
 <li>Four persons to be rescued: <code>person1</code>, <code>person2</code>, <code>person3</code>, <code>person4</code>.</li>
-<li>2 safe zone capacities (note that is less than the number of people): <code>capacity1</code>, <code>capacity2</code>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Initial Conditions:</strong></p>
-<ul>
-<li>The grid is defined by setting adjacent locations. For example, <code>(adjacent loc-1-1 loc-1-2)</code> defines that these two locations are connected.</li>
-<li>The drone starts in one specific location.</li>
-<li>Each person is placed in a different location.</li>
-<li>Safe zones have capacity, which is essential for rescuing people.</li>
+<li>Two capacities: <code>capacity1</code>, <code>capacity2</code>.</li>
 </ul>
 </li>
 </ul>
@@ -285,16 +276,15 @@
 <h2 id="testing-cases-and-results">Testing cases and results</h2>
 <p>To better understand the environment, an image is displayed with the starting positions of the drone and the people for each of the studied cases. In all of the scenarios the drone is represented as a blue circle, the people as red squares, the obstacles as gray squares and the safe zone in green.</p>
 <h3 id="case-1-4x4-grid-solvable-problem-and-static-domain">Case 1: 4x4 grid, solvable problem and static domain</h3>
-<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\4x4_grid_solvable_problem_state.png" alt="Initial State of Drone Rescue Mission">
-<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C4x4_grid_solvable_problem_animation.gif" alt="Animation"></p>
+<h2 id=""><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations\4x4_grid_solvable_problem_animation.gif" alt="Animation"></h2>
 <h3 id="case-2-5x5-grid-solvable-problem-and-static-domain">Case 2: 5x5 grid, solvable problem and static domain</h3>
-<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_solvable_problem_state.png" alt="Initial State of Drone Rescue Mission">
-<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C5x5_grid_solvable_problem_animation.gif" alt="Animation"></p>
+<h2 id="-1"><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations\5x5_grid_solvable_problem_animation.gif" alt="Animation"></h2>
 <h3 id="case-3-5x5-grid-unsolvable-problem-and-static-domain">Case 3: 5x5 grid, unsolvable problem and static domain</h3>
-<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_unsolvable_problem_state.png" alt="Initial State of Drone Rescue Mission"></p>
+<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations\5x5_grid_unsolvable_problem_state.png" alt="Initial State of Drone Rescue Mission"></p>
+<p><em>No animation since it's unsolvable</em></p>
+<hr>
 <h3 id="case-3-5x5-grid-solvable-problem-and-dynamic-capacity-domain">Case 3: 5x5 grid, solvable problem and dynamic capacity domain</h3>
-<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_dynamic_capacity_problem_state.png" alt="Initial State of Drone Rescue Mission">
-<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C5x5_grid_dynamic_capacity_problem_animation.gif" alt="Animation"></p>
+<h2 id="-2"><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations\5x5_grid_dynamic_capacity_problem_animation.gif" alt="Animation"></h2>
 <h2 id="analysis-of-the-results">Analysis of the results</h2>
 <p>The search strategy used in this planning task is A* (A-star) with the <strong>merge-and-shrink heuristic</strong>. The heuristic incorporates an exact <strong>bisimulation shrink strategy</strong>, which reduces the size of the state space while preserving relevant transitions. For merging, a <strong>precomputed merge tree</strong> is used, guided by the <strong>miasm_merge_and_shrink</strong> approach. This includes heuristic scoring functions like <strong>goal relevance</strong>, <strong>DFP</strong> (Diverse Frontier Projection), and <strong>total order</strong>, ensuring an efficient search. To further optimize, <strong>structural symmetries</strong> are handled through OSS, reducing redundancy, and <strong>stubborn sets simple</strong> pruning is applied to eliminate unnecessary expansions, improving search performance.</p>
 <p>Moreover, in the provided plan for each scenario, several key performance parameters were analyzed, including generated nodes, expanded nodes, and total time used, as it can be seen in Table 1. The generated nodes represent the total number of states created during the search process, while the expanded nodes refer to the subset of those states that were fully explored, with all their possible actions evaluated. These metrics, along with the total time taken by the planner, provide insight into the efficiency and complexity of the search process in each case.</p>
