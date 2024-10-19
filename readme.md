@@ -100,10 +100,12 @@ To better understand the environment, an image is displayed with the starting po
 ### Case 1: 4x4 grid, solvable problem and static domain
 
 ![Initial State of Drone Rescue Mission](lab2/4x4_grid_solvable_problem_state.png)
+![Animation](animations\4x4_grid_solvable_problem_animation.gif)
 
 ### Case 2: 5x5 grid, solvable problem and static domain
 
 ![Initial State of Drone Rescue Mission](lab2/5x5_grid_solvable_problem_state.png)
+![Animation](animations\5x5_grid_solvable_problem_animation.gif)
 
 ### Case 3: 5x5 grid, unsolvable problem and static domain
 
@@ -112,6 +114,7 @@ To better understand the environment, an image is displayed with the starting po
 ### Case 3: 5x5 grid, solvable problem and dynamic capacity domain
 
 ![Initial State of Drone Rescue Mission](lab2/5x5_grid_dynamic_capacity_problem_state.png)
+![Animation](animations\5x5_grid_dynamic_capacity_problem_animation.gif)
 
 ## Analysis of the results
 
@@ -137,3 +140,5 @@ From these results, it can be concluded that the efficiency of the planner (in t
 | **Makespan**                     | 0.0270 s             | 0.0310 s            | 0.0210 s             | 0.0210 s            | N/A                    | 0.0270 s                 | 0.0270 s                |
 | **Search duration**              | 8.28 s               | 3.43 s              | 8.61 s               | 2.78 s              | 7.10 s                 | 9.00 s                   | 2.77 s                  |
 | **Plans found**                  | 1                    | 1                   | 1                    | 1                   | 0                      | 1                        | 1                       |
+
+*Table 1: Run stats for the each of the four problems, for delfi and BWFS.* 

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Rescue drone task</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="rescue-drone-task">Rescue drone task</h1>
+<h2 id="abstract">Abstract</h2>
+<p>The report focuses on the design and implementation of a rescue drone planning system for navigating disaster sites using a grid-based environment. It includes the testing of the planner on various grid configurations and an analysis of the efficiency of the solutions generated, considering factors like search space, operator applicability, and performance across different test cases. The goal is to evaluate whether the planner can consistently generate effective and optimal rescue plans.</p>
+<h2 id="analysis-of-the-problem">Analysis of the problem</h2>
+<h3 id="static-domain-file-overview-rescue-drone-static_domainpddl">Static Domain File Overview: <code>rescue-drone-static_domain.pddl</code></h3>
+<p>This file defines the <strong>static rules</strong> and capabilities of the environment, including:</p>
+<ul>
+<li>
+<p><strong>Types:</strong></p>
+<ul>
+<li><code>location</code>, <code>person</code>, <code>drone</code>, <code>capacity</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Predicates:</strong></p>
+<ul>
+<li><code>(Drone-location ?d ?loc)</code>: The drone is at a specific location.</li>
+<li><code>(Person-location ?p ?loc)</code>: A person is located at a specific location.</li>
+<li><code>(Drone-free)</code>: The drone is available to pick up someone.</li>
+<li><code>(Rescued ?p)</code>: A person has been rescued.</li>
+<li><code>(Safe-zone-has-capacity ?loc ?c)</code>: A safe zone has remaining capacity for rescue.</li>
+<li><code>(Adjacent ?loc1 ?loc2)</code>: Two locations are adjacent.</li>
+</ul>
+</li>
+<li>
+<p><strong>Actions:</strong></p>
+<ul>
+<li><strong>Move</strong>: The drone can move between adjacent locations if there are no obstacles.</li>
+<li><strong>Pick-up</strong>: The drone can pick up a person if they are in the same location, provided the drone is free.</li>
+<li><strong>Drop-off</strong>: The drone can drop off a person at a safe zone, provided the zone has capacity.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="dynamic-domain-file-overview-rescue-drone-dynamic_domainpddl">Dynamic Domain File Overview: <code>rescue-drone-dynamic_domain.pddl</code></h3>
+<p>This file extends the static domain with the action <code>Increase-Capacity</code>, allowing the drone to reset the predicate <code>Safe-zone-has-capacity</code></p>
+<hr>
+<h3 id="problem-file-overview-case-1-4x4_grid_solvable_problempddl">Problem File Overview: Case 1. <code>4x4_grid_solvable_problem.pddl</code></h3>
+<ul>
+<li>
+<p><strong>Objects:</strong></p>
+<ul>
+<li><strong>Locations:</strong>
+<ul>
+<li>16 locations are defined in the 4x4 grid: <code>loc-1-1</code>, <code>loc-1-2</code>, <code>loc-1-3</code>, <code>loc-1-4</code>, <code>loc-2-1</code>, <code>loc-2-2</code>, <code>loc-2-3</code>, <code>loc-2-4</code>, <code>loc-3-1</code>, <code>loc-3-2</code>, <code>loc-3-3</code>, <code>loc-3-4</code>, <code>loc-4-1</code>, <code>loc-4-2</code>, <code>loc-4-3</code>, <code>loc-4-4</code>.</li>
+</ul>
+</li>
+<li><strong>Drone:</strong>
+<ul>
+<li>One drone is defined: <code>drone1</code>.</li>
+</ul>
+</li>
+<li><strong>Three persons to be rescued:</strong>
+<ul>
+<li><code>person1</code>, <code>person2</code>, <code>person3</code>.</li>
+</ul>
+</li>
+<li><strong>Capacities for safe zones:</strong>
+<ul>
+<li>Three capacity objects: <code>c1</code>, <code>c2</code>, <code>c3</code>. These likely represent the capacity limits of safe zones where rescued persons will be dropped off.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Initial Conditions:</strong></p>
+<ul>
+<li><strong>Grid definition through adjacency:</strong>
+<ul>
+<li>The grid is defined using adjacency relations between the locations in a 4x4 configuration. For example, <code>(adjacent loc-1-1 loc-1-2)</code> means that <code>loc-1-1</code> is adjacent to <code>loc-1-2</code>, and similar relations exist to define both horizontal and vertical adjacencies.</li>
+</ul>
+</li>
+<li><strong>Drone Location:</strong>
+<ul>
+<li>The drone starts at a specific location within the grid, though the exact initial position is not fully visible from the provided content.</li>
+</ul>
+</li>
+<li><strong>Person Locations:</strong>
+<ul>
+<li>Each person (<code>person1</code>, <code>person2</code>, <code>person3</code>) is placed in different, distinct locations within the grid.</li>
+</ul>
+</li>
+<li><strong>Safe Zones:</strong>
+<ul>
+<li>The capacities defined as <code>c1</code>, <code>c2</code>, <code>c3</code> indicate safe zones where the persons need to be delivered once rescued by the drone. Each safe zone has a capacity constraint that must be considered during the mission.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Goal:</strong></p>
+<ul>
+<li>The goal for all the problems is to have all persons with the rescue state set to true (all of them dropped-off on the safe zone)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="problem-file-overview-case-2-5x5_grid_solvable_problempddl">Problem File Overview: Case 2. <code>5x5_grid_solvable_problem.pddl</code></h3>
+<ul>
+<li>
+<p><strong>Objects:</strong></p>
+<ul>
+<li>Locations: 25 locations are defined (<code>loc-1-1</code>, <code>loc-1-2</code>, etc.) representing the cells of the grid.</li>
+<li>One drone: <code>drone1</code>.</li>
+<li>Four persons to be rescued: <code>person1</code>, <code>person2</code>, <code>person3</code>, <code>person4</code>.</li>
+<li>Four capacities: <code>capacity1</code>, <code>capacity2</code>, <code>capacity3</code>, <code>capacity4</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Initial Conditions:</strong></p>
+<ul>
+<li>The grid is defined by setting adjacent locations. For example, <code>(adjacent loc-1-1 loc-1-2)</code> defines that these two locations are connected.</li>
+<li>The drone starts in one specific location.</li>
+<li>Each person is placed in a different location.</li>
+<li>Safe zones have capacity, which is essential for rescuing people.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="problem-file-overview-case-3-5x5_grid_unsolvable_problempddl">Problem File Overview: Case 3. <code>5x5_grid_unsolvable_problem.pddl</code></h3>
+<ul>
+<li>
+<p><strong>Objects:</strong></p>
+<ul>
+<li>Locations: 25 locations are defined (<code>loc-1-1</code>, <code>loc-1-2</code>, etc.) representing the cells of the grid.</li>
+<li>One drone: <code>drone1</code>.</li>
+<li>Four persons to be rescued: <code>person1</code>, <code>person2</code>, <code>person3</code>, <code>person4</code>.</li>
+<li>2 safe zone capacities (note that is less than the number of people): <code>capacity1</code>, <code>capacity2</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Initial Conditions:</strong></p>
+<ul>
+<li>The grid is defined by setting adjacent locations. For example, <code>(adjacent loc-1-1 loc-1-2)</code> defines that these two locations are connected.</li>
+<li>The drone starts in one specific location.</li>
+<li>Each person is placed in a different location.</li>
+<li>Safe zones have capacity, which is essential for rescuing people.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="problem-file-overview-case-4-5x5_grid_dynamic_capacity_problempddl">Problem File Overview: Case 4. <code>5x5_grid_dynamic_capacity_problem.pddl</code></h3>
+<p>This problem is identic to the <code>5x5_grid_unsolvable_problem.ppdl</code> with the difference of the domain, this one uses the <code>lab2/rescue-drone-dynamic_domain.pddl</code> which includes the action <code>Increase-Capacity</code>.</p>
+<hr>
+<h2 id="testing-cases-and-results">Testing cases and results</h2>
+<p>To better understand the environment, an image is displayed with the starting positions of the drone and the people for each of the studied cases. In all of the scenarios the drone is represented as a blue circle, the people as red squares, the obstacles as gray squares and the safe zone in green.</p>
+<h3 id="case-1-4x4-grid-solvable-problem-and-static-domain">Case 1: 4x4 grid, solvable problem and static domain</h3>
+<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\4x4_grid_solvable_problem_state.png" alt="Initial State of Drone Rescue Mission">
+<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C4x4_grid_solvable_problem_animation.gif" alt="Animation"></p>
+<h3 id="case-2-5x5-grid-solvable-problem-and-static-domain">Case 2: 5x5 grid, solvable problem and static domain</h3>
+<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_solvable_problem_state.png" alt="Initial State of Drone Rescue Mission">
+<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C5x5_grid_solvable_problem_animation.gif" alt="Animation"></p>
+<h3 id="case-3-5x5-grid-unsolvable-problem-and-static-domain">Case 3: 5x5 grid, unsolvable problem and static domain</h3>
+<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_unsolvable_problem_state.png" alt="Initial State of Drone Rescue Mission"></p>
+<h3 id="case-3-5x5-grid-solvable-problem-and-dynamic-capacity-domain">Case 3: 5x5 grid, solvable problem and dynamic capacity domain</h3>
+<p><img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\lab2\5x5_grid_dynamic_capacity_problem_state.png" alt="Initial State of Drone Rescue Mission">
+<img src="file:///c:\Users\Pedro\Documents\MAI\PAR\labs\animations%5C5x5_grid_dynamic_capacity_problem_animation.gif" alt="Animation"></p>
+<h2 id="analysis-of-the-results">Analysis of the results</h2>
+<p>The search strategy used in this planning task is A* (A-star) with the <strong>merge-and-shrink heuristic</strong>. The heuristic incorporates an exact <strong>bisimulation shrink strategy</strong>, which reduces the size of the state space while preserving relevant transitions. For merging, a <strong>precomputed merge tree</strong> is used, guided by the <strong>miasm_merge_and_shrink</strong> approach. This includes heuristic scoring functions like <strong>goal relevance</strong>, <strong>DFP</strong> (Diverse Frontier Projection), and <strong>total order</strong>, ensuring an efficient search. To further optimize, <strong>structural symmetries</strong> are handled through OSS, reducing redundancy, and <strong>stubborn sets simple</strong> pruning is applied to eliminate unnecessary expansions, improving search performance.</p>
+<p>Moreover, in the provided plan for each scenario, several key performance parameters were analyzed, including generated nodes, expanded nodes, and total time used, as it can be seen in Table 1. The generated nodes represent the total number of states created during the search process, while the expanded nodes refer to the subset of those states that were fully explored, with all their possible actions evaluated. These metrics, along with the total time taken by the planner, provide insight into the efficiency and complexity of the search process in each case.</p>
+<p>From these results, it can be concluded that the efficiency of the planner (in terms of time) does not solely depend on the number of generated or expanded nodes. External factors, such as the complexity of the problem and the specific structure of the state space, likely contribute to the observed differences.</p>
+<table>
+<thead>
+<tr>
+<th>Problem &amp; Planner</th>
+<th>4x4_solvable (Delfi)</th>
+<th>4x4_solvable (BWFS)</th>
+<th>5x5_solvable (Delfi)</th>
+<th>5x5_solvable (BWFS)</th>
+<th>5x5_unsolvable (Delfi)</th>
+<th>5x5_dyn_capacity (Delfi)</th>
+<th>5x5_dyn_capacity (BWFS)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Plan length</strong></td>
+<td>28 steps</td>
+<td>32 steps</td>
+<td>22 steps</td>
+<td>22 steps</td>
+<td>N/A</td>
+<td>28 steps</td>
+<td>28 steps</td>
+</tr>
+<tr>
+<td><strong>Plan cost</strong></td>
+<td>28</td>
+<td>32</td>
+<td>22</td>
+<td>22</td>
+<td>N/A</td>
+<td>28</td>
+<td>28</td>
+</tr>
+<tr>
+<td><strong>Expanded states</strong></td>
+<td>29</td>
+<td>95</td>
+<td>23</td>
+<td>128</td>
+<td>N/A</td>
+<td>29</td>
+<td>1370</td>
+</tr>
+<tr>
+<td><strong>Reopened states</strong></td>
+<td>0</td>
+<td>N/A</td>
+<td>0</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Evaluated states</strong></td>
+<td>60</td>
+<td>N/A</td>
+<td>62</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>73</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Generated states</strong></td>
+<td>84</td>
+<td>149</td>
+<td>85</td>
+<td>233</td>
+<td>N/A</td>
+<td>101</td>
+<td>1656</td>
+</tr>
+<tr>
+<td><strong>Search time</strong></td>
+<td>0.00077 s</td>
+<td>0.00045 s</td>
+<td>0.00086 s</td>
+<td>0.00047 s</td>
+<td>N/A</td>
+<td>0.00105 s</td>
+<td>0.01657 s</td>
+</tr>
+<tr>
+<td><strong>Total time</strong></td>
+<td>0.0865 s</td>
+<td>0.00045 s</td>
+<td>0.00578 s</td>
+<td>0.00278 s</td>
+<td>N/A</td>
+<td>0.2131 s</td>
+<td>0.01657 s</td>
+</tr>
+<tr>
+<td><strong>Peak memory</strong></td>
+<td>22,476 KB</td>
+<td>N/A</td>
+<td>5,656 KB</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>58,348 KB</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Makespan</strong></td>
+<td>0.0270 s</td>
+<td>0.0310 s</td>
+<td>0.0210 s</td>
+<td>0.0210 s</td>
+<td>N/A</td>
+<td>0.0270 s</td>
+<td>0.0270 s</td>
+</tr>
+<tr>
+<td><strong>Search duration</strong></td>
+<td>8.28 s</td>
+<td>3.43 s</td>
+<td>8.61 s</td>
+<td>2.78 s</td>
+<td>7.10 s</td>
+<td>9.00 s</td>
+<td>2.77 s</td>
+</tr>
+<tr>
+<td><strong>Plans found</strong></td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><em>Table 1: Run stats for the each of the four problems, for delfi and BWFS.</em></p>
+
+            
+            
+        </body>
+        </html>
